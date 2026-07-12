@@ -313,7 +313,8 @@ void UIImagePicker::drawTooltip(Graphics::Surface &surface, int x, int y) {
 
 	surface.fillRect(rect, surface.format.RGBToColor(0, 0, 0));
 	surface.frameRect(rect, surface.format.RGBToColor(255, 255, 255));
-	_vm->getMainFont()->drawString(&surface, tooltip, rect.left + 2, rect.top, surface.w, surface.format.RGBToColor(255, 255, 255));
+	_vm->getMainFont()->drawString(&surface, tooltip, rect.left + 2, 
+		rect.top - BladeRunnerEngine::kUIFontYOffset, surface.w, surface.format.RGBToColor(255, 255, 255));
 }
 
 bool UIImagePicker::handleMouseAction(int x, int y, bool down, bool up, bool ignore) {

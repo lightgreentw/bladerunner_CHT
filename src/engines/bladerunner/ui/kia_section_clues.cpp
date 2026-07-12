@@ -57,10 +57,10 @@ KIASectionClues::KIASectionClues(BladeRunnerEngine *vm, ActorClues *clues) : KIA
 
 	_buttons = new UIImagePicker(_vm, 2);
 
-	_cluesScrollBox = new UIScrollBox(_vm, scrollBoxCallback, this, kClueCount, 1, false, Common::Rect(312, 172, 500, 376), Common::Rect(506, 160, 506, 394));
+	_cluesScrollBox = new UIScrollBox(_vm, scrollBoxCallback, this, kClueCount, 1, false, Common::Rect(312, 172, 500, 376), Common::Rect(506, 160, 506, 394), 14);
 	_uiContainer->add(_cluesScrollBox);
 
-	_filterScrollBox = new UIScrollBox(_vm, scrollBoxCallback, this, 128, 1, false, Common::Rect(142, 162, 291, 376), Common::Rect(120, 160, 120, 370), 10); // lineHeightOverride: shape(9)+1px
+	_filterScrollBox = new UIScrollBox(_vm, scrollBoxCallback, this, 128, 1, false, Common::Rect(142, 162, 291, 376), Common::Rect(120, 160, 120, 370), 14);
 	_uiContainer->add(_filterScrollBox);
 
 	_assetTypeFilterCount = 4 + 1; // we have 4 asset types

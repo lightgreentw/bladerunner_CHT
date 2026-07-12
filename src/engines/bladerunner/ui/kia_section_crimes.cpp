@@ -54,7 +54,7 @@ KIASectionCrimes::KIASectionCrimes(BladeRunnerEngine *vm, ActorClues *clues) : K
 
 	_buttons = new UIImagePicker(_vm, 5);
 
-	_cluesScrollBox = new UIScrollBox(_vm, scrollBoxCallback, this, 50, 1, false, Common::Rect(312, 172, 500, 376), Common::Rect(506, 160, 506, 394));
+	_cluesScrollBox = new UIScrollBox(_vm, scrollBoxCallback, this, 50, 1, false, Common::Rect(312, 172, 500, 376), Common::Rect(506, 160, 506, 394),14);
 	_uiContainer->add(_cluesScrollBox);
 
 	_acquiredClueCount = 0;

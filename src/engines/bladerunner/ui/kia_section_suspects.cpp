@@ -70,7 +70,7 @@ KIASectionSuspects::KIASectionSuspects(BladeRunnerEngine *vm, ActorClues *clues)
 	_replicantCheckBox    = new UICheckBox(_vm, checkBoxCallback, this, Common::Rect(142, 342, 275, 354), 1, _replicantFilter);
 	_nonReplicantCheckBox = new UICheckBox(_vm, checkBoxCallback, this, Common::Rect(142, 354, 275, 366), 1, _nonReplicantFilter);
 	_othersCheckBox       = new UICheckBox(_vm, checkBoxCallback, this, Common::Rect(142, 366, 275, 378), 1, _othersFilter);
-	_cluesScrollBox       = new UIScrollBox(_vm, scrollBoxCallback, this, kClueCount, 1, false, Common::Rect(312, 172, 500, 376), Common::Rect(506, 160, 506, 394));
+	_cluesScrollBox       = new UIScrollBox(_vm, scrollBoxCallback, this, kClueCount, 1, false, Common::Rect(312, 172, 500, 376), Common::Rect(506, 160, 506, 394),14);
 	_crimesScrollBox      = new UIScrollBox(_vm, scrollBoxCallback, this, 50, 1, false, Common::Rect(154, 258, 291, 298), Common::Rect(120, 249, 120, 297), 12);
 	_uiContainer->add(_whereaboutsCheckBox);
 	_uiContainer->add(_MOCheckBox);

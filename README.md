@@ -65,7 +65,7 @@
 **功能**：新增 UI 字型大小與垂直偏移常數
 
 - `kUIFontSize = 16`：UI TTF 字型大小（pt），在 72dpi 下 1pt = 1px，調整此數字即可改變全部 UI 文字大小
-- `kUIFontYOffset = -5`：所有字形的垂直偏移修正（負數往上移），用於修正 FreeType 字型在 `kTTFSizeModeCell` 模式下視覺偏低的問題
+- `kUIFontYOffset = -5`：所有字形的垂直偏移修正（負數往上移），用於修正 FreeType 字型在 `kTTFSizeModeCell` 模式下視覺偏低的問題（此數值需依使用字型微調，預設使用Source Han Sans TC Light，偏移設定-5）
 
 **注意**：原本的 `kMainFontTTFSize = 12` 已更名為 `kUIFontSize = 16`，並在 `loadTTFFont()` 加入明確的 `72, 72` dpi 參數，確保數值直觀對應像素高度。
 
@@ -79,7 +79,7 @@
 2. **字幕 TTF**（次選）：共用 `SUBFONT.TTF` 的字型（`SBTLVERS.TRE` 宣告的字型）
 3. **`KIA6PT.FON`**（最後備援）：原始內建點陣字型
 
-**注意**：`UIFONT.TTF` 使用固定檔名，由 `br_subtitle_tool.py import` 自動打包進 `SUBTITLES.MIX`
+**注意**：`UIFONT.TTF` 使用固定檔名，由 `br_subtitle_tool.py import` 打包進 `SUBTITLES.MIX`
 
 ---
 
@@ -110,7 +110,16 @@
 - Checkbox 和高亮 icon 垂直置中（`_lineHeight - shape->getHeight()) / 2`）
 - 滑鼠點擊判定（`handleMouseMove`）改用 `_lineHeight`
 
-**注意**：所有現有 `UIScrollBox` 呼叫端不需修改，預設行為完全相容
+**目前實際套用的行高覆寫值**：
+| 位置 | 檔案 | 數值 |
+|---|---|---|
+| 線索資料庫 — 線索類別/犯罪現場（左） | `kia_section_clues.cpp` `_filterScrollBox` | 14 |
+| 線索資料庫 — 線索清單（右） | `kia_section_clues.cpp` `_cluesScrollBox` | 14 |
+| 案件資料庫 — 線索清單（右） | `kia_section_crimes.cpp` `_cluesScrollBox` | 14 |
+| 嫌犯資料庫 — 關聯犯罪現場（左） | `kia_section_suspects.cpp` `_crimesScrollBox` | 12 |
+| 嫌犯資料庫 — 線索清單（右） | `kia_section_suspects.cpp` `_cluesScrollBox` | 14 |
+
+要調整這些位置的行距，只需修改對應建構子最後一個參數的數字，重新 build 即可，不影響其他清單。
 
 ---
 
@@ -120,6 +129,7 @@
 - `Image::tooltip` 從 `Common::String` 改為 `Common::U32String`
 - `defineImage()` 和 `setImageTooltip()` 在存入時自動 UTF-8 解碼
 - `drawTooltip()` 直接用 `U32String` 呼叫 `drawString`，正確渲染 CJK 字元
+- `drawTooltip()` 的文字 y 座標改為 `rect.top - BladeRunnerEngine::kUIFontYOffset`，自動補償全域字形偏移，避免 tooltip 文字跑出框外
 
 ---
 
@@ -189,10 +199,6 @@
 - `addToList()` 改用 `getTextU32()` 取得文字
 - `_lineHeight` 在 `showAt()` 時從 `_shapes->get(1)->getHeight()` 取得（與邊框 shape 齊平，避免行距空隙）
 - `kLineHeightExtra`：額外行高常數（預設 0），增加可讓行距稍寬，並自動用 `darkenRect` 填補 shape 未覆蓋的區域
-- `save()`：`text.encode(Common::kUtf8)` 存檔
-- `load()`：`Common::U32String(readStringSz, Common::kUtf8)` 讀檔
-
-**注意**：`DLGMENU.TRE` 現在已納入翻譯工具的處理範圍
 
 ![對話選項中英對照](BRCHT_007.png)
 ---
@@ -217,7 +223,7 @@
 - 直接把 UI 翻譯寫回 TLK 資源檔案內
 - 自動備份為 `.bak`，可隨時還原
 
-#### 涵蓋的 UI TRE 資源：
+#### 涵蓋的 UI TRE 資源檔：
 | 資源檔名稱 | 內容 |
 |----------|------|
 | KIA.TRE | KIA 介面標籤、按鈕 tooltip |
@@ -391,6 +397,35 @@ case Common::ZH_CHN:
 2. Fribidi 警告（`initWithU32String: Fribidi not available`）對中文無影響，可忽略
 3. `EXTRA.TRE` 找不到的警告為正常，此資源非必要
 4. 對話選單（DialogueMenu）的邊框 shape 高度固定（9px），透過 `kLineHeightExtra` 調整行距高於9px，邊框有間隔，目前還是先用9px，缺點是行距很擠。
+5. ScummVM 2026.3.1版本中文字變醜，每個字多了一個黑色外框，目前還找不到原因。
+
+### ScummVM 2026.3.1版編譯問題
+`BladeRunnerEngine` 有兩個字型欄位：
+- `_mainFont`（`BladeRunner::Font*`，舊式點陣字型）
+- `_mainFontTTF`（`Graphics::Font*`，新的 TTF 字型）
+
+`getMainFont()` 函式會依 `_mainFontIsTTF` 自動回傳正確的那一個。**但引擎裡有多處程式碼繞過 `getMainFont()`，直接呼叫裸指標 `_vm->_mainFont->`**。
+
+TTF 模式啟用時，`_mainFont` 會被明確設為 `nullptr`（因為改用 `_mainFontTTF`）。任何直接呼叫 `_vm->_mainFont->drawString(...)` 的地方，在 TTF 模式下就是對 `nullptr` 呼叫成員函式，直接閃退。
+
+英文（點陣）模式因為 `_mainFont` 剛好是有效指標，這些地方「碰巧」不會出事，因此問題在純英文測試時完全隱形。
+
+#### 受影響的檔案（全部需要把 `_vm->_mainFont->` 改成 `_vm->getMainFont()->`）
+| 檔案 | 觸發時機 |
+|---|---|
+| `ui/kia.cpp` | 每次進入 KIA、每一幀（Chinyen 金額、版本號顯示）|
+| `ui/ui_dropdown.cpp` | 開啟任何下拉選單（如設定裡的語言選擇）|
+| `ui/ui_input_box.cpp` | 存檔輸入文字框 |
+| `ui/esper.cpp` | 使用 ESPER 照片分析機 |
+| `subtitles.cpp` | 特定字幕疊加畫面 |
+| `debugger.cpp` | 開啟除錯主控台疊加畫面 |
+
+**如果你是從舊版分支重新合併這份修改包，務必先搜尋整個 `engines/bladerunner/` 目錄確認沒有殘留 `_vm->_mainFont->` 裸指標呼叫：**
+```bash
+grep -rn "_vm->_mainFont->" engines/bladerunner/
+```
+正常情況下這行指令應該完全沒有輸出。
+
 
 ---
 
